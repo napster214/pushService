@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean" scope="singleton" lazy-init="default" autowire="default" dependency-check="default">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc_dxfs</value>
+		</property>
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+	<!--
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor"/>
+	 -->
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.WebSphereNativeJdbcExtractor"/>
+	 
+	<!-- 
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.WebLogicNativeJdbcExtractor"/>
+	 -->
+	 
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*" rollback-for="BaseAppException"/>
+        </tx:attributes>
+    </tx:advice>
+    
+	<!-- <aop:config>
+		<aop:advisor pointcut="execution(* com.jadlsoft.business..*(..))" advice-ref="txAdvice"/>
+	</aop:config> -->
+	
+	<bean id="daoUtils" class="com.jadlsoft.dbutils.DaoUtils" init-method="init">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+		<property name="nje">
+			<ref local="nativeJdbcExtractor" />
+		</property>
+		<property name="tableList">
+			<list>
+				<!-- <value>t_dm_xzqh//select * from t_dm_xzqh order by dm asc//dm</value>
+				<value>t_dm_czgnlb//select dm||mc dm,link mc from T_DM_CZGNLB where zt = '0' order by sortdm//dm</value> -->
+			</list>
+		</property>
+		<property name="keyColumn" value="dm" />
+		<property name="saveLog" value="true" />
+		<property name="sqlLocate" value="sqlmapconfig.xml,sqlmapconfig-wechatsys.xml,sqlmapconfig-login.xml,sqlmapconfig-sms.xml" />
+		<property name="dicConfigFile" value="dicconfig.xml" />
+	</bean>
+	
+	<bean id="logUtils" class="com.jadlsoft.business.LogUtils">
+		<property name="daoUtils">
+			<ref local="daoUtils" />
+		</property>
+	</bean>	
+	
+	<bean id="baseManager" class="com.jadlsoft.business.BaseManager" abstract="true">
+		<property name="daoUtils" ref="daoUtils" />
+		<property name="logUtils" ref="logUtils" />
+	</bean>
+	
+	<bean id="commonlistManager" class="com.jadlsoft.business.CommonListManager"  parent="baseManager"/>
+	
+	<bean name="/commonlist" class="com.jadlsoft.struts.action.BaseListAction">
+		<property name="listManager" ref="commonlistManager"/>
+	</bean>
+	
+</beans>

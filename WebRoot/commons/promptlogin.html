@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=GBK">
+<title>服务管理后台- 北京创新京安丹灵科技股份公司</title>
+<!-- Bootstrap -->
+<link
+	href="../common/css/bootstrap/bootstrap.min.css"
+	rel="stylesheet">
+<link href="../common/css/bootstrap/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="../common/css/loginui.css" rel="stylesheet">
+<script type="text/javascript" src="../common/js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="../common/js/bootstrap/bootstrap.min.js"></script>
+	  <script type="text/javascript" src="../common/validate.js"></script>
+</head>
+<body>
+	<div class="login">
+		<div class="navbarline navbar-static-top" role="navigation">
+			<div class="navbar main">
+				<a href="../" class="appbrand"><span>服务管理后台</span>
+				</a>
+				<ul class="pull-right">
+					<li><span>欢迎来宾</span>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+
+		<div class="container" style="padding-top:100px;">
+
+			<div class="col-center">
+				<form class="form-signin" name="mainFrm" id="mainFrm" method="post" role="form">
+					<h4 class="form-signin-heading">登录</h4>
+					<div id="retTip" style="display:none;"  class="alert alert-primary"></div>
+					<div class="input-group">
+					<span class="input-group-addon">用户</span>
+					<input type="text" name="userId" value=""  title="用户名称" alt="notnull;length<=36" class="form-control form-input"> 
+					</div>
+					<div class="input-group">
+					<span class="input-group-addon">密码</span>
+					<input type="password"  onkeydown="keySubFrm()"  title="密码" alt="notnull;length<=60" name="userPass" value="" class="form-control form-input">
+					</div>
+					<button class="btn btn-lg btn-primary btn-block sign-in" type="button" onclick="submainFrm()">登 录</button>
+				</form>
+			</div>
+
+		</div>
+		<!-- /container -->
+	</div>
+	<script type="text/javascript">
+		function submainFrm() {
+			if(!checkForm(document.mainFrm)){
+				return ;
+			}
+			$("#retTip").css("display","block");
+			$("#retTip").html("正在提交...");
+			$.ajax({
+				type:"post",
+				url:"../dologin/loginService.do?method=login",
+				data:$("#mainFrm").serialize(),
+				dataType:"json",
+				success:function(data){
+					if (data.statusCode == "00000") {
+						$("#retTip").css("display","none");
+						$("#retTip").html("");
+						window.location.replace("../admin/index.jsp");
+					} else{
+						$("#retTip").css("display","none");
+						$("#retTip").html("");
+						alert(data.msg);
+					}
+				},
+				error:function(ret){
+					$("#retTip").css("display","none");
+					$("#retTip").html("");
+					alert(ret.responseText);
+				}
+			});
+		}
+		
+		function keySubFrm(){
+		 if(event.keyCode==13){
+			submainFrm();		 
+		 } //检查按得是不是回车
+		}
+	</script>
+</body>
+</html>

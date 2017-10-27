@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<sqls>
+	<!-- <select id="checkUser">
+		select * from t_wh_user a
+		left join t_wh_loginlock b on a.userid = b.userid 
+		and ((to_char(b.logintime,'yyyy-MM-dd') = to_char(sysdate,'yyyy-MM-dd') and b.islock = '0') or (to_char(b.logintime,'yyyy-MM-dd') = to_char(sysdate-1,'yyyy-MM-dd')) )
+		 where a.userid = :userid and a.userpass = :password and a.zt ='0'
+	</select> -->
+</sqls>

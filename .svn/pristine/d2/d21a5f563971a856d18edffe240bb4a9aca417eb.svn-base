@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="SearchForm" type="org.apache.struts.action.DynaActionForm">
+      <form-property name="baseconditions" type="java.lang.String" />
+      <form-property name="queryparamter" type="java.lang.String" />
+      <form-property name="forward" type="java.lang.String" />
+      <form-property name="multiselect" type="java.lang.String" />
+      <form-property name="pageNo" type="java.lang.String" />
+      <form-property name="pageSize" type="java.lang.String" />
+      <form-property name="choice" type="java.lang.String" />
+      <!-- add by 张俊吉 at 2008-10-06 添加总记录数 -->
+      <form-property name="pageTotal" type="java.lang.String" />
+    </form-bean>
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards >
+    
+
+  </global-forwards>
+
+  <action-mappings>
+    <action
+      attribute="SearchForm"
+      name="SearchForm"
+      path="/search"
+      scope="request"
+      type="org.springframework.web.struts.DelegatingActionProxy">
+      <forward name="Success" path="/searchresult.jsp" />
+      <forward name="SuccessMulti" path="/searchresultmulti.jsp" />
+      <forward name="Tree" path="/searchtree.jsp" />
+    </action>
+  </action-mappings>
+
+
+</struts-config>
+

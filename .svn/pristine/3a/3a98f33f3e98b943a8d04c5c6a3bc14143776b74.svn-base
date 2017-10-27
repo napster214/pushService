@@ -1,0 +1,70 @@
+package com.jadlsoft.struts.action;
+
+import java.net.URLEncoder;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.actions.DispatchAction;
+
+import com.jadlsoft.constants.SystemConstants;
+import com.jadlsoft.constants.WeChatConstants;
+import com.jadlsoft.handler.GzhHandler;
+import com.jadlsoft.utils.JsonUtil;
+import com.jadlsoft.utils.ResponseUtils;
+import com.jadlsoft.utils.ResultBean;
+import com.jadlsoft.utils.StringUtils;
+
+public class WeChatAction extends DispatchAction {
+	
+	/**
+	 * 获取临时带参二维码功能
+	 * 	所需参数：
+	 * 		基本信息：appid、appno、appsecret
+	 * 		eventKey : 参数
+	 * 		expireSeconds : 二维码有效期（单位/s，最长30天）
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward getTempErweimaWithPara(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		
+		ResultBean resultBean = null;
+		
+		String appid = request.getParameter("appid");
+		String appno = request.getParameter("appno");
+		String appsecret = request.getParameter("appsecret");
+		String eventKey = request.getParameter("eventKey");
+		String expireSeconds = request.getParameter("expireSeconds");
+		
+		String postData = "{\"expire_seconds\": "+expireSeconds+", \"action_name\": \"QR_STR_SCENE\", " +
+				"\"action_info\": {\"scene\": {\"scene_str\": \""+eventKey+"\"}},\"scene_id\":11}";
+		
+		//1、创建二维码，拿到票据
+		GzhHandler handler = GzhHandler.getInstance(appno, appid, appsecret);
+		String resp = handler.createTempErweimaWithPara(postData);
+		//2、解析返回值，如果生成成功，根据返回的ticket组合为图片地址，并返回给客户端
+		Map respMap = JsonUtil.parserToMap(resp);
+		if (respMap != null && respMap.containsKey("ticket") && !StringUtils.isNullOrEmpty(respMap.get("ticket"))) {
+			String ticket = URLEncoder.encode((String)respMap.get("ticket"));
+			String ewmUrl = WeChatConstants.EWM_GETWITHPARA.replace("${TICKET}", ticket);
+			resultBean = new ResultBean(SystemConstants.RESULT_SUCCESS, ewmUrl);
+			resultBean.setArg1(ticket);
+		}else {
+			//说明生成失败！
+			resultBean = new ResultBean(SystemConstants.RESULT_FAIL, resp);
+		}
+		ResponseUtils.render(response, JsonUtil.bean2json(resultBean));
+		return null;
+	}
+	
+}

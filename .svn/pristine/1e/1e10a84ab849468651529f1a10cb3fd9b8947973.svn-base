@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+<struts-config>
+
+	
+	<form-beans>
+		<!-- 微信form -->
+		<form-bean name="weChatSysForm" type="com.jadlsoft.struts.form.WeChatSysForm"></form-bean>
+	</form-beans>
+
+	<action-mappings>
+		<!-- 微信后台管理 -->
+		<action path="/wechatsys" parameter="method"
+			scope="request"
+			name="weChatSysForm"
+			type="org.springframework.web.struts.DelegatingActionProxy">
+			
+			<forward name="editwechat" path="/wechatedit.jsp"></forward>
+			<forward name="wechatlist" path="/wechatlist.do" redirect="true"></forward>
+		</action>
+		
+		<!-- 对外提供的http接口 -->
+		<!-- 认证使用 -->
+		<action path="/main" parameter="method"
+			scope="request"
+			type="org.springframework.web.struts.DelegatingActionProxy">
+			
+		</action>
+		
+		<!-- 微信相关设置 -->
+		<action path="/wechat" parameter="method"
+			scope="request"
+			type="org.springframework.web.struts.DelegatingActionProxy">
+			
+		</action>
+		
+		<!-- 推送消息相关 -->
+		<action path="/msgpush" parameter="method"
+			scope="request"
+			type="org.springframework.web.struts.DelegatingActionProxy">
+			
+		</action>
+		
+		<!-- 微信粉丝用户相关 -->
+		<action path="/user" parameter="method"
+			scope="request"
+			type="org.springframework.web.struts.DelegatingActionProxy">
+			
+		</action>
+		
+	</action-mappings>
+</struts-config>

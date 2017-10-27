@@ -1,0 +1,132 @@
+package com.jadlsoft.utils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+
+import com.core.jadlsoft.utils.ResponseUtils;
+
+/**
+ * 推送相关工具
+ * @类名: MsgUtils
+ * @作者: lcx
+ * @时间: 2017-9-25 上午11:39:52
+ */
+public class PushUtils {
+
+	private static Logger logger = Logger.getLogger(PushUtils.class);
+	
+	/**
+	 * 从request中获取指定key的值，如果没有就返回空字符串
+	 * @param request
+	 * @param key
+	 * @return: String
+	 */
+	public static String getStrFromReq(HttpServletRequest request, String key) {
+		String parameter = request.getParameter(key);
+		if (parameter == null) {
+			parameter = "";
+		}
+		return parameter;
+	}
+	
+	/**
+	 * 组装返回数据
+	 * @param statusCode	结果码
+	 * @param argData	返回的数据信息（支持list、set、map、string）
+	 * @param argDataName 返回数据信息的key信息（比如在邮箱的简单推送中叫做发送失败的用户邮箱信息--erruseres）
+	 * @param errMsg 返回消息
+	 * @param key	唯一标识，可以为空
+	 * @return: Map
+	 */
+	public static Map toRespData(String statusCode, Object argData,
+			String argDataName, String errMsg, String key) {
+		Map resultMap = new HashMap();
+		
+		/**
+		 * 1、处理key
+		 */
+		if (key == null) {
+			key = "";
+		}
+		
+		/**
+		 * 2.1、处理数据信息
+		 */
+		if (argData != null) {
+			if (!(argData instanceof String)) {
+				if (argData instanceof List) {
+					//list，转为list数据
+					argData = JsonUtil.list2json((List)argData);
+				}else if (argData instanceof Map) {
+					argData = JsonUtil.map2json((Map)argData);
+				}else if (argData instanceof Set) {
+					argData = JsonUtil.set2json((Set) argData);
+				}else if (argData instanceof Object[]) {
+					argData = JsonUtil.array2json((Object[]) argData);
+				}else {
+					argData = JsonUtil.bean2json(argData);
+				}
+			}
+		}else {
+			argData = "";
+		}
+		
+		/**
+		 * 2.2 处理数据信息的key
+		 */
+		if (NullUtils.isBlank(argDataName)) {
+			argDataName = "argData";
+		}
+		
+		/**
+		 * 3 处理返回说明信息
+		 */
+		if (NullUtils.isBlank(errMsg)) {
+			errMsg = "";
+		}
+		
+		/**
+		 * 4、组装map
+		 */
+		resultMap.put("statusCode", statusCode);
+		resultMap.put(argDataName, argData);
+		resultMap.put("errMsg", errMsg);
+		resultMap.put("key", key);
+		
+		return resultMap;
+	}
+	
+	
+	
+	/**
+	 * 将结果返回
+	 * @param response
+	 * @param statusCode	结果码
+	 * @param argData	返回的数据信息（支持list、set、map、string）
+	 * @param argDataName 返回数据信息的key信息（比如在邮箱的简单推送中叫做发送失败的用户邮箱信息--erruseres）
+	 * @param errMsg 返回消息
+	 * @param key	唯一标识，可以为空
+	 * @return: void
+	 */
+	public static void doResponse(HttpServletResponse response, String statusCode, 
+			Object argData, String argDataName, String errMsg, String key) {
+		Map resultMap = toRespData(statusCode, argData, argDataName, errMsg, key);
+		if (NullUtils.isNullOrEmpty(resultMap) || response == null) {
+			return;
+		}
+		try {
+			ResponseUtils.render(response, JsonUtil.map2json(resultMap));
+		} catch (Exception e) {
+			logger.error("返回结果出错！");
+			e.printStackTrace();
+		}
+	}
+	
+}

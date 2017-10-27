@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	 <!-- 微信公众号接入列表 -->
+	<forward request="/admin/wechatlist.do" 
+		requirecondition="1~=~1"
+		defaultcondition="1~=~1"
+		datasource="(
+					select *
+					  from (select w.id, w.gzhmc, w.appid, w.appno, w.appsecret
+					          from t_wx_jbxx w
+					         where zt = '0') a,
+					       (select *
+					          from (select x.wxid wxid, x.accesstoken, x.lasttimemillis, x.hddz
+					                  from t_wx_xtsz x
+					                 where x.zt = '0')) b
+					 where a.id = b.wxid(+)
+				 )" 
+		success="/admin/wechat/wechatlist.jsp"	 
+		title=""
+		field=""
+	/>
+	
+</configs>

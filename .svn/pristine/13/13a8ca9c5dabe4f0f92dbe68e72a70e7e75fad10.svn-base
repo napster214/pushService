@@ -1,0 +1,425 @@
+/* CSS Document */
+
+BODY 
+{
+background-color:#CFE4FF;
+padding:0px 0px 0px 0px;;
+border:0;
+margin:0;
+scrollbar-face-color: #B0D1FA;  /*滚动条凸出部分的颜色*/
+scrollbar-highlight-color: #ffffff; /*滚动条空白部分的颜色*/
+scrollbar-shadow-color: #666666; /*立体滚动条阴影的颜色*/
+scrollbar-3dlight-color: #ffffff; /*滚动条亮边的颜色*/
+scrollbar-arrow-color: #0E4095;  /*上下按钮上三角箭头的颜色*/
+scrollbar-track-color: #EFF4FF;  /*滚动条的背景颜色*/
+scrollbar-darkshadow-color: #000000; /*滚动条强阴影的颜色*/
+scrollbar-base-color:#eeeeee;  /*滚动条的基本颜色*/
+}
+
+TD
+{
+FONT-SIZE: 12px;
+font-family:宋体;
+letter-spacing:1px;
+line-height:200%;
+vertical-align:top;
+border:0;
+}
+
+TH{
+FONT-SIZE: 12px;
+font-family:宋体;
+background-color:#6690DA;
+color:#ffffff;
+letter-spacing:1px;
+font-weight:600;
+text-align:center;
+line-height:250%;
+vertical-align:middle;
+border-right:1px solid #C2D5FC;
+}
+text{
+border:1px solid #999999;
+background-image:url("../images/Input_BG.jpg");
+height:20px;
+font-size:12px;
+color:#000000;
+line-height:200%;
+}
+input{
+border:1px solid #999999;
+height:20px;
+font-size:12px;
+color:expression(this.readOnly? "#5e5e5e":"#000000");
+line-height:120%;
+}
+
+
+textarea{
+border:1px solid #999999;
+font-size:12px;
+color:expression(this.readOnly? "#5e5e5e":"#000000");
+line-height:200%;
+}
+
+A:link{COLOR: #0000cc;TEXT-DECORATION: none}
+A:visited{COLOR:#0000cc;TEXT-DECORATION: none}
+A:active{COLOR:#000000;TEXT-DECORATION: none}
+A:hover{COLOR: #ff0000;TEXT-DECORATION: none}
+
+.Form_Input{
+border:1px solid #999999;
+/* background-image:url("../images/Input_BG.jpg"); */
+height:25px;
+font-size:12px;
+color:#000000;
+line-height:200%;
+}
+
+.Form_Textarea{
+border:1px solid #999999;
+font-size:12px;
+color:#000000;
+line-height:200%;
+}
+
+.Button_Blue{
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../images/Button_Blue.gif', sizingMethod='scale');
+height:26px;
+margin:0;
+letter-spacing:2px;
+color:#ffffff;
+border:0;
+padding:0px 5px 0px 5px;
+cursor:hand;
+}
+
+.Button_Silver{
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../images/Button_Silver.gif', sizingMethod='scale');
+height:26px;
+margin:0;
+letter-spacing:2px;
+color:#000000;
+border:0;
+padding:0px 5px 0px 5px;
+cursor:hand;
+}
+.Button_Silver_Login{
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/Button_Silver.gif', sizingMethod='scale');
+height:26px;
+margin:0;
+letter-spacing:2px;
+color:#000000;
+border:0;
+padding:0px 5px 0px 5px;
+cursor:hand;
+}
+
+.Button_Go{
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../images/Button_Go.gif', sizingMethod='scale');
+height:22px;
+margin:0;
+color:#000000;
+border:0;
+padding:0px 3px 0px 3px;
+cursor:hand;
+}
+
+.Bottom{
+padding:0px 0px 0px 0px; 
+font-size:12px; 
+font-weight:500; 
+color:#ffffff; 
+letter-spacing:1px; 
+vertical-align:bottom;
+line-height:200%;
+}
+
+.Left_Title{
+padding:0px 0px 0px 10px; 
+font-size:14px; 
+font-weight:500; 
+color:#000000; 
+letter-spacing:3px; 
+vertical-align:middle;
+line-height:200%;
+text-align:left;
+}
+
+.Left_Text{
+padding:0px 0px 0px 5px; 
+font-size:12px; 
+font-weight:500; 
+color:#000000; 
+letter-spacing:1px; 
+vertical-align:middle;
+line-height:150%;
+text-align:left;
+}
+
+.Tag_Active{
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/Tag_Active.jpg", sizingMethod="scale");
+}
+
+.Tag_Normal{
+filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/Tag_Normal.jpg", sizingMethod="scale");
+}
+
+.Table_Main{
+border-collapse:collapse;
+}
+
+.Table_Sec{
+border-collapse:collapse;
+background-color:#F7F7F7;
+border:1px solid #0E4095;
+}
+
+.Tag_Text{
+text-align:center;
+vertical-align:absmiddle;
+padding:15px 15px 3px 15px;
+letter-spacing:1px;
+line-height:150%;
+font-size:14px;
+color:#FFFFFF;
+position:relative;
+cursor:hand;
+white-space:nowrap;
+width:100%;
+}
+
+.Td_Prompt{
+font-size:16px;
+color:#000000;
+letter-spacing:1px;
+font-weight:600;
+text-align:center;
+line-height:200%;
+vertical-align:middle;
+}
+
+.Td_Title{
+filter:progid:DXImageTransform.Microsoft.Gradient(startColorStr='#E6F2FE', endColorStr='#A8D1FF', gradientType='0');
+color:#000000;
+letter-spacing:1px;
+font-weight:500;
+text-align:center;
+line-height:200%;
+border:1px solid #0E4095;
+}
+
+.Td_Normal{
+color:#000000;
+/*background-color:#FFFFFF;*/
+letter-spacing:1px;
+font-weight:600;
+text-align:center;
+line-height:200%;
+border:1px solid #0E4095;
+}
+
+.Text_Title{
+color:#000000;
+letter-spacing:1px;
+font-weight:600;
+line-height:200%;
+}
+
+.Pop_Title{
+background-color:#6690DA;
+color:#ffffff;
+letter-spacing:1px;
+font-weight:600;
+text-align:center;
+line-height:250%;
+border-right:1px solid #C2D5FC;
+}
+.Pop_TR{
+	background-color:expression(this.rowIndex%2==0 ? "#E9E7E8":"#ffffff");
+	cursor:hand;
+}
+.Pop_TR1{
+	background-color:expression("#B9B7E8");
+	cursor:hand;
+}
+.Pop_TR2{
+	background-color:expression("GREEN");
+	cursor:hand;
+}
+.Pop_TR3{
+	background-color:expression("YELLOW");
+	cursor:hand;
+}
+.Edit_TD{
+	border-top:1px solid #0E4095;
+	border-bottom:1px solid #0E4095;
+	line-height:200%;
+	vertical-align: middle;
+	padding:4px 4px 4px 4px; 
+}
+.Button_TD{
+	border-top:1px solid #0E4095;
+	border-bottom:1px solid #0E4095;
+	height:50px;
+	vertical-align: bottom;
+	padding:4px 4px 4px 10px; 
+}
+.Section_TD{
+	border-top:1px solid #0E4095;
+	border-bottom:1px solid #0E4095;
+	background-color: #E9F2D3;
+	vertical-align: bottom;
+	padding:4px 4px 4px 4px;
+	font:normal normal bold 14px Arial;
+	color:#0E4095;
+}
+.Pop_Text{
+color:#000000;
+letter-spacing:1px;
+font-weight:500;
+line-height:200%;
+border-right:1px solid #C2D5FC;
+vertical-align:top;
+padding-left:4px;               
+}
+
+.Pop_Text_White{
+background-color:#ffffff;
+color:#000000;
+letter-spacing:1px;
+font-weight:500;
+line-height:200%;
+border-right:1px solid #C2D5FC;
+}
+
+.Pop_Text_Gray{
+background-color:#E9E7E8;
+color:#000000;
+letter-spacing:1px;
+font-weight:500;
+line-height:200%;
+border-right:1px solid #C2D5FC;
+}
+
+.line_big{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1 solid black;
+				font-size: 20px;
+				font-family:宋体;
+		　　}
+		   
+		   .hide_big{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1;
+				font-size: 20px;
+				font-family:宋体;
+		　　}
+		   
+		   .line_normal{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1 solid black;
+		　　}
+		
+		   .hide_normal{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1;
+		　　}
+		   
+		   .line_big_len{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1 solid black;
+				font-size: 20px;
+				font-family:宋体;
+				text-overflow:ellipsis;
+				overflow:visible;
+		　　}
+		
+			.line_normal_len{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1 solid black;
+				text-overflow:ellipsis;
+				overflow:visible;
+		　　}
+		
+			.hide_big_len{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1;
+				font-size: 20px;
+				font-family:宋体;
+				text-overflow:ellipsis;
+				overflow:visible;
+		　　}
+		
+			.hide_normal_len{
+				background:transparent;
+				border-top:0;
+				border-left:0;
+				border-right:0;
+				border-bottom:1;
+				text-overflow:ellipsis;
+				overflow:visible;
+		　　}
+		   
+		   .border_cell{
+		   		border-collapse:collapse;
+		   }
+		   
+		   .border_cell th{
+		   		border-collapse:collapse;
+		   		border:1px solid #000;
+		   		width:100;
+		   		line-height:200%;
+		   		text-align:center;
+		   		vertical-align:middle;
+		   }
+		   
+		   .border_cell td{
+		   		border-collapse:collapse;
+		   		border:1px solid #000;
+		   		width:200;
+		   		line-height:100%;
+		   		text-align:left;
+		   		vertical-align:middle;
+		   }
+		   
+		   .small_border_cell{
+		   		border-collapse:collapse;
+		   }
+		   
+		   .small_border_cell th{
+		   		border-collapse:collapse;
+		   		border:1px solid #000;
+		   		line-height:200%;
+		   		text-align:center;
+		   		vertical-align:middle;
+		   }
+		   
+		   .small_border_cell td{
+		   		border-collapse:collapse;
+		   		border:1px solid #000;
+		   		line-height:100%;
+		   		text-align:left;
+		   		vertical-align:middle;
+		   }

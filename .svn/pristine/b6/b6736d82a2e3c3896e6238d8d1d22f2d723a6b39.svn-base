@@ -1,0 +1,207 @@
+package com.jadlsoft.struts.action;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.actions.DispatchAction;
+
+import com.jadlsoft.constants.SystemConstants;
+import com.jadlsoft.handler.EmailHandler;
+import com.jadlsoft.utils.JsonUtil;
+import com.jadlsoft.utils.NullUtils;
+import com.jadlsoft.utils.PushUtils;
+import com.jadlsoft.utils.ResponseUtils;
+import com.jadlsoft.utils.StringUtils;
+
+/**
+ * 对外提供的http服务器请求的处理
+ * @类名: EmailAction
+ * @作者: lcx
+ * @时间: 2017-8-18 上午11:19:44
+ */
+public class EmailAction extends DispatchAction {
+	
+	private Logger logger = Logger.getLogger(EmailAction.class);
+	
+	/**
+	 * 发送简单消息（向一个或多个邮箱地址推送相同的消息）
+	 * 参数信息：
+	 * 		String title 标题
+	 * 		String msg  消息
+	 * 		String key 唯一标识（由调用发指定，返回时会带上，如果没有指定返回的是空字符串）
+	 * 		String touseres 目标邮箱，多个中间以逗号分开
+	 * 返回参数信息：
+	 * 		{
+				"statusCode": 结果码,
+				"errMsg": 失败信息,
+				"erruseres": 发送失败的用户邮箱 ,
+				"key": "调用方传递的"
+			}
+	 */
+	public void singleMsg(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		String title = PushUtils.getStrFromReq(request, "title");
+		String msg = PushUtils.getStrFromReq(request, "msg");
+		String key = PushUtils.getStrFromReq(request, "key");
+		String touseres = PushUtils.getStrFromReq(request, "touseres");
+		
+		/**
+		 * 1、校验参数
+		 */
+		if (NullUtils.isBlank(title) || NullUtils.isBlank(msg) || NullUtils.isBlank(touseres)) {
+			PushUtils.doResponse(response, SystemConstants.STATUSCODE_ERR_COM_ARGLOSS, null, null, "缺失参数", key);
+			return;
+		}
+		
+		/**
+		 * 2、解析目标邮箱
+		 */
+		String[] touserArr = touseres.split(",");
+		
+		/**
+		 * 3、 给每个邮箱发送消息
+		 */
+		List errUseres = new ArrayList();
+		for (String toemail : touserArr) {
+			boolean b = EmailHandler.getInstance().sendSingleMsg(toemail, msg, title);
+			if (!b) {
+				errUseres.add(toemail);
+			}
+		}
+		
+		/**
+		 * 4、处理结果
+		 */
+		if (errUseres.size()>0) {
+			//有发送失败的
+			PushUtils.doResponse(response, SystemConstants.STATUSCODE_ERR_COM_HASPUSHERR,
+					errUseres, "erruseres", null, key);
+			return;
+		}
+		
+		//全部成功
+		PushUtils.doResponse(response, SystemConstants.STATUSCODE_OK, null, null, null, key);
+	}
+	
+	/**
+	 * 发送多条邮箱消息（可以给不同用户发送不同的内容）
+	 * 参数信息：
+	 * 		List<Map> msgData 数据信息
+	 * 			Map：
+	 * 				String title 标题
+	 * 				String msg  消息
+	 * 				String key 唯一标识（由调用方指定，返回时会带上，如果没有指定返回的是空字符串）
+	 * 				String touser 目标邮箱
+	 * 返回参数信息：
+	 * 		{
+	 *			"statusCode": 结果码,
+	 *			"errMsg": 失败信息,
+	 *			"erruseres": 发送失败的信息{
+	 *								"email"		邮箱
+	 *								"errcode"	失败码
+	 *								"errmsg"	失败详情
+	 *								"key"	key
+	 *							}
+	 *		}
+	 */
+	public void mulitMsg(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+
+		String msgDataStr = PushUtils.getStrFromReq(request, "msgData");
+		
+		/**
+		 * 1、校验/解析 参数
+		 */
+		if (NullUtils.isBlank(msgDataStr)) {
+			PushUtils.doResponse(response, SystemConstants.STATUSCODE_ERR_COM_ARGLOSS, null, null, "缺失参数", null);
+			return;
+		}
+		
+		List msgList = new ArrayList();
+		try {
+			msgList = JsonUtil.parserToList(msgDataStr);
+		} catch (Exception e) {
+			//参数解析失败
+			logger.error("【邮箱推送】解析参数失败！");
+			PushUtils.doResponse(response, SystemConstants.STATUSCODE_ERR_COM_ARGERR, null, null, "参数格式不对", null);
+			return;
+		}
+		
+		if (NullUtils.isNullOrEmpty(msgList)) {
+			PushUtils.doResponse(response, SystemConstants.STATUSCODE_ERR_COM_ARGERR, null, null, "参数为空", null);
+			return;
+		}
+		
+		/**
+		 * 2、单个发送
+		 */
+		List errUseres = new ArrayList();
+		Map temMap;
+		for (Object msgObj : msgList) {
+			Map msgMap;
+			if (msgObj instanceof Map) {
+				msgMap = (Map) msgObj;
+			}else if (msgObj instanceof String) {
+				msgMap = JsonUtil.parserToMap((String) msgObj);
+			}else {
+				logger.error("【邮箱推送】数据格式错误！");
+				continue;
+			}
+			String title = NullUtils.getStrFromObject(msgMap.get("title"));
+			String msg = NullUtils.getStrFromObject(msgMap.get("msg"));
+			String key = NullUtils.getStrFromObject(msgMap.get("key"));
+			String touser = NullUtils.getStrFromObject(msgMap.get("touser"));
+			
+			if (NullUtils.isBlank(touser)) {
+				logger.error("【邮箱推送】目标邮箱为空！");
+				continue;
+			}
+			if (NullUtils.isBlank(title) || NullUtils.isBlank(msg)) {
+				temMap = new HashMap();
+				temMap.put("email", touser);
+				temMap.put("key", key);
+				temMap.put("errcode", SystemConstants.STATUSCODE_ERR_EMAIL_NOHEADORMSG);
+				temMap.put("errmsg", "标题或者内容为空");
+				logger.error("【邮箱推送】标题或者内容为空！");
+				errUseres.add(temMap);
+				continue;
+			}
+			
+			boolean b = EmailHandler.getInstance().sendSingleMsg(touser, msg, title);
+			if (!b) {
+				temMap = new HashMap();
+				temMap.put("email", touser);
+				temMap.put("key", key);
+				temMap.put("errcode", SystemConstants.STATUSCODE_ERR_EMAIL_PUSHERR);
+				temMap.put("errmsg", "推送失败");
+				logger.error("【邮箱推送】单个推送失败！");
+				errUseres.add(temMap);
+			}
+		}
+		
+		/**
+		 * 3、处理结果
+		 */
+		if (errUseres.size()>0) {
+			//有发送失败的
+			PushUtils.doResponse(response, SystemConstants.STATUSCODE_ERR_COM_HASPUSHERR,
+					errUseres, "erruseres", null, null);
+			return;
+		}
+		
+		//全部成功
+		PushUtils.doResponse(response, SystemConstants.STATUSCODE_OK, null, null, null, null);
+	}
+	
+}

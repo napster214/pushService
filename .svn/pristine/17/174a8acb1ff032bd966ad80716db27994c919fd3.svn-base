@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="searchManager" class="com.jadlsoft.business.search.SearchManager" parent="baseManager" />
+	 
+	<bean name="/search/search" class="com.jadlsoft.struts.action.search.SearchAction" singleton="false">
+		<property name="searchManager">
+			<ref local="searchManager"/>
+		</property>
+	</bean>
+</beans>

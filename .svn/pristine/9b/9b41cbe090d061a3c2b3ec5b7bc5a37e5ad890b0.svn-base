@@ -1,0 +1,105 @@
+package com.jadlsoft.struts.action.login;
+
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.actions.DispatchAction;
+
+import com.jadlsoft.business.login.ILoginManager;
+import com.jadlsoft.constants.SystemConstants;
+import com.jadlsoft.domain.UserSessionBean;
+import com.jadlsoft.utils.DateUtils;
+import com.jadlsoft.utils.ResponseUtils;
+import com.jadlsoft.utils.ResultBean;
+import com.jadlsoft.utils.StringUtils;
+
+public class LoginServiceAction extends DispatchAction {
+	
+	private ILoginManager loginManager;
+	public void setLoginManager(ILoginManager loginManager) {
+		this.loginManager = loginManager;
+	}
+
+
+	/**
+	 * ajax 登录
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward login(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		ResultBean resultBean = null;
+		
+		String userid = request.getParameter("userId");
+		String password = request.getParameter("userPass");
+
+		String msg = "";
+		StringBuffer sb = new StringBuffer();
+		//非空校验
+		if (StringUtils.isBlank(userid)) {
+			ResponseUtils.renderResult(resultBean, response, SystemConstants.RESULT_FAIL, "userid不能为空！");
+			return null;
+		}
+		if (StringUtils.isBlank(password)) {
+			ResponseUtils.renderResult(resultBean, response, SystemConstants.RESULT_FAIL, "密码不能为空!");
+			return null;
+		}
+		
+		//校验正确性
+		Map map = loginManager.get(userid, password);
+		if (StringUtils.isNullOrEmpty(map)) {
+			ResponseUtils.renderResult(resultBean, response, SystemConstants.RESULT_FAIL, "userid或者密码错误！");
+			return null;
+		}
+		
+		//登录成功
+		UserSessionBean userSessionBean = new UserSessionBean();
+		userSessionBean.setUserid(userid);
+		userSessionBean.setLogintime(DateUtils.getCurrentData());
+		userSessionBean.setZt(SystemConstants.ZT_TRUE);
+		userSessionBean.setUserName((String) map.get("username"));
+		
+		HttpSession session = request.getSession(true);
+		session.setMaxInactiveInterval(60 * 60 *2);
+		session.setAttribute("userSessionBean", userSessionBean);
+		
+		ResponseUtils.renderResult(resultBean, response, SystemConstants.RESULT_SUCCESS, "success");
+		return null;
+	}
+	
+	/**
+	 * 注销
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward logout(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) throws Exception {
+		request.getSession().invalidate();
+		Cookie[] cookies=request.getCookies();
+		for(int i=0;i<cookies.length;i++){
+			Cookie cookie=cookies[i];
+			cookie.setMaxAge(0);
+			response.addCookie(cookie);
+		}
+		System.out.println("系统退出++++++++++++++++++++++++");
+		
+		ResponseUtils.render(response, "succ");
+		return null;
+	}
+}

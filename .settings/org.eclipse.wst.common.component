@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="dxfs">
+        <wb-resource deploy-path="/" source-path="/WebRoot"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/config"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/framework"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src_email"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src_wechat"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src-sms"/>
+        <property name="context-root" value="/dxfs"/>
+        <property name="java-output-path" value="/dxfs/WebRoot/WEB-INF/classes"/>
+    </wb-module>
+</project-modules>

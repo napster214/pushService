@@ -1,0 +1,365 @@
+package com.jadlsoft.struts.action;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.actions.DispatchAction;
+
+import com.jadlsoft.handler.GzhHandler;
+import com.jadlsoft.utils.JsonUtil;
+import com.jadlsoft.utils.ResponseUtils;
+import com.jadlsoft.utils.StringUtils;
+
+public class MsgPushAction extends DispatchAction {
+	
+	/**
+	 * 发送模板消息
+	 * @功能: 发送平台上面定义的模板消息
+	 * 	根据传递的用户的信息推送
+	 * 		要求参数：
+	 * 			appid、appno、appsecret
+	 * 			String template_id 模板id（通过微信开发平台获取）
+	 * 			Map varData 数据，简单处理，一个key对应一个变量，value为对应值
+	 * 			List<String> touseres 要推送的粉丝 的openid（弃用）
+	 * 			List<Map> touseres 要推送的粉丝的信息，包含自定义的模板信息
+	 * 						格式为： 
+	 * 							 openid : {
+	 * 							 	nickname : {
+	 * 									value : "晓寒轻"，
+	 *									color : "red"
+	 * 								},
+	 * 								fwqip : {
+	 * 									value : "192.168.20.124",
+	 * 									color :　"yellow"
+	 * 								}
+	 * 							 },
+	 * 							 ...
+	 *  
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward sendTemplateMsgByUserList(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		String appid = request.getParameter("appid");
+		String appno = request.getParameter("appno");
+		String appsecret = request.getParameter("appsecret");
+		String template_id = request.getParameter("template_id");	//模板id
+		String varData = request.getParameter("varData");	//变量信息
+		
+		if (StringUtils.isBlank(template_id)) {
+			ResponseUtils.render(response, "模板id为空！");
+			return null;
+		}
+		
+		//解析粉丝信息
+		String touseres = request.getParameter("touseres");
+		if (StringUtils.isBlank(touseres)) {
+			ResponseUtils.render(response, "没有设置推送目标粉丝！");
+			return null;
+		}
+		
+//		List<Map> userMapList = JsonUtil.parserToList(touseres);
+//		Map useresMap = JsonUtil.parserToMap(touseres);
+		
+		
+//		if (userMapList != null) {
+//			return null;
+//		}
+		
+		List<String> userList = JsonUtil.parserToList(touseres);
+		if (userList != null && userList.size()>0) {
+			Map everyVarData;
+			List errOpenid = new ArrayList();
+			for (String openid : userList) {
+				Map msgData = new HashMap();
+				msgData.put("touser", openid);
+				msgData.put("template_id", template_id);
+				msgData.put("topcolor", "#FF0000");
+				//设置变量值
+				if (!StringUtils.isBlank(varData)) {
+					Map varDataMap = JsonUtil.parserToMap(varData);
+					if (varDataMap != null && varDataMap.size()>0) {
+						Map data = new HashMap();
+						Set<Entry> entrySet = varDataMap.entrySet();
+						for (Entry entry : entrySet) {
+							everyVarData = new HashMap();
+							everyVarData.put("value", entry.getValue());
+							everyVarData.put("color", "#173177");
+							data.put(entry.getKey(), everyVarData);
+						}
+						if (data.size()>0) {
+							msgData.put("data", data);
+						}
+					}
+				}
+				//调用处理类完成消息的发送
+				String msg = GzhHandler.getInstance(appno, appid, appsecret).sendTemplateMsg(msgData);
+				
+				Map resMap = JsonUtil.parserToMap(msg);
+				
+				if ("0".equals(resMap.get("errcode"))) {
+					//成功
+				}else {
+					//失败
+					errOpenid.add(openid);
+				}
+			}
+			//TODO 统一返回格式
+			if (errOpenid.size() == 0) {
+				//没有失败的
+				ResponseUtils.render(response, "");
+				return null;
+			}else {
+				//将失败的openID信息返回
+				ResponseUtils.render(response, JsonUtil.list2json(errOpenid));
+				return null;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据用户列表发送模板，支持自定义模板的选项（如，颜色，不同的用户收到的模板内容不同）
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward sendDIYTemplateMsgByUserList(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+					throws Exception {
+		String appid = request.getParameter("appid");
+		String appno = request.getParameter("appno");
+		String appsecret = request.getParameter("appsecret");
+		String template_id = request.getParameter("template_id");	//模板id
+//		String varData = request.getParameter("varData");	//变量信息
+		
+		if (StringUtils.isBlank(template_id)) {
+			ResponseUtils.render(response, "模板id为空！");
+			return null;
+		}
+		
+		//解析粉丝信息
+		String touseres = request.getParameter("touseres");
+		if (StringUtils.isBlank(touseres)) {
+			ResponseUtils.render(response, "没有设置推送目标粉丝！");
+			return null;
+		}
+		
+		
+//		List<Map> userMapList = JsonUtil.parserToList(touseres);
+		Map useresMap = JsonUtil.parserToMap(touseres);
+		if (useresMap == null || useresMap.size()==0) {
+			return null;
+		}
+		
+		
+		List errOpenid = new ArrayList();	//返回错误信息
+		
+		Set openids = useresMap.keySet();
+		for (String openid : (Set<String>)openids) {
+			Map valueMap = (Map) useresMap.get(openid);
+			if (valueMap != null && valueMap.size()>0) {
+				Set fieldKeys = valueMap.keySet();
+				
+				Map msgData = new HashMap();	//调用微信使用的
+				msgData.put("touser", openid);
+				msgData.put("template_id", template_id);
+				msgData.put("topcolor", "#FF0000");
+				
+				Map data = new HashMap();	//数据
+				Map everyData;
+				for (String field : (Set<String>)fieldKeys) {
+					
+					Map fieldMap = (Map) valueMap.get(field);
+					if (fieldMap != null && fieldMap.size()>0) {
+						everyData = new HashMap();
+						everyData.put("value", fieldMap.get("value"));
+						everyData.put("color", fieldMap.get("color")==null || fieldMap.get("color").equals("")
+								? "#173177" : fieldMap.get("color"));
+						data.put(field, everyData);
+					}
+				}
+				if (data.size()>0) {
+					msgData.put("data", data);
+				}
+				
+				//调用处理类完成消息的发送
+				String msg = GzhHandler.getInstance(appno, appid, appsecret).sendTemplateMsg(msgData);
+				
+				Map resMap = JsonUtil.parserToMap(msg);
+				
+				if ("0".equals(resMap.get("errcode"))) {
+					//成功
+				}else {
+					//失败
+					errOpenid.add(openid);
+				}
+			}
+		}
+		
+		//TODO 统一返回格式
+		if (errOpenid.size() == 0) {
+			//没有失败的
+			ResponseUtils.render(response, "");
+			return null;
+		}else {
+			//将失败的openID信息返回
+			ResponseUtils.render(response, JsonUtil.list2json(errOpenid));
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据标签发送模板消息
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward sendTemplateMsgByTag(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		String appid = request.getParameter("appid");
+		String appno = request.getParameter("appno");
+		String appsecret = request.getParameter("appsecret");
+		//获取处理类
+		GzhHandler gzhHandler = GzhHandler.getInstance(appno, appid, appsecret);
+		
+		String tagid = request.getParameter("tagid");
+		String template_id = request.getParameter("template_id");	//模板id
+		String varData = request.getParameter("varData");	//变量信息
+		
+		//先获取该标签下的所有粉丝信息
+		Map fansMap = new HashMap();
+		fansMap.put("tagid", tagid);
+		String fansInfo = gzhHandler.getFansByTag(fansMap);
+		
+		List fansOpenid = null;
+		Map fansInfoMap = JsonUtil.parserToMap(fansInfo);
+		if (fansInfoMap != null && fansInfoMap.size()>0) {
+			int count = Integer.parseInt((String)fansInfoMap.get("count"));
+			if (count > 0) {
+				fansOpenid = JsonUtil.parserToList((String) ((Map) fansInfoMap.get("data")).get("openid"));
+			}
+		}
+		
+		if (fansOpenid != null && fansOpenid.size()>0) {
+			Map everyVarData;
+			List errOpenid = new ArrayList();
+			for (String openid : (List<String>)fansOpenid) {
+				Map msgData = new HashMap();
+				msgData.put("touser", openid);
+				msgData.put("template_id", template_id);
+				msgData.put("topcolor", "#FF0000");
+				//设置变量值
+				if (!StringUtils.isBlank(varData)) {
+					Map varDataMap = JsonUtil.parserToMap(varData);
+					if (varDataMap != null && varDataMap.size()>0) {
+						Map data = new HashMap();
+						Set<Entry> entrySet = varDataMap.entrySet();
+						for (Entry entry : entrySet) {
+							everyVarData = new HashMap();
+							everyVarData.put("value", entry.getValue());
+							everyVarData.put("color", "#173177");
+							data.put(entry.getKey(), everyVarData);
+						}
+						if (data.size()>0) {
+							msgData.put("data", data);
+						}
+					}
+				}
+				//调用处理类完成消息的发送
+				String msg = gzhHandler.sendTemplateMsg(msgData);
+				Map resMap = JsonUtil.parserToMap(msg);
+				
+				if ("0".equals(resMap.get("errcode"))) {
+					//成功
+				}else {
+					//失败
+					errOpenid.add(openid);
+				}
+			}
+			//TODO 统一返回格式
+			if (errOpenid.size() == 0) {
+				//没有失败的
+				ResponseUtils.render(response, "");
+				return null;
+			}else {
+				//将失败的openID信息返回
+				ResponseUtils.render(response, JsonUtil.list2json(errOpenid));
+				return null;
+			}
+			
+		}else {
+			ResponseUtils.render(response, "该标签下没有任何粉丝！");
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据标签发送自定义消息（当前只支持文本消息）
+	 * @功能  根据标签发送自定义消息
+	 * 		要求参数：
+	 * 			appid、appno、appsecret
+	 * 			String tagid  标签id（通过微信后台获取）
+	 * 			String title   标题
+	 * 			String content 内容
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward sendMsgByTag(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		String appid = request.getParameter("appid");
+		String appno = request.getParameter("appno");
+		String appsecret = request.getParameter("appsecret");
+		
+		String tagid = request.getParameter("tagid");
+		String title = request.getParameter("title");
+		String content = request.getParameter("content");
+		
+		//组装接口所需信息
+		Map msgData = new HashMap();
+		
+		Map filterMap = new HashMap();
+		filterMap.put("is_to_all", true);
+		filterMap.put("tag_id", tagid);
+		
+		Map textMap = new HashMap();
+		textMap.put("content", content);
+		
+		msgData.put("filter", filterMap);
+		msgData.put("text", textMap);
+		msgData.put("msgtype", "text");
+		
+		String res = GzhHandler.getInstance(appno, appid, appsecret).sendMsgByTag(msgData);
+		ResponseUtils.render(response, res);
+		return null;
+	}
+	
+}

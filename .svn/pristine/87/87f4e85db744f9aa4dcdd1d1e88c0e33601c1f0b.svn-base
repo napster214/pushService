@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wechatsys>
+	<!-- 获取所有公众号信息，包含系统设置信息 -->
+	<select id="getAllWithXtsz">
+		<![CDATA[
+			select *
+				  from (select w.id, w.gzhmc, w.appid, w.appno, w.appsecret
+				          from t_wx_jbxx w
+				         where zt = '0') a,
+				       (select *
+				          from (select x.id xtszid, x.wxid wxid, x.accesstoken, x.lasttimemillis, x.hddz
+				                  from t_wx_xtsz x
+				                 where x.zt = '0')) b
+				 where a.id = b.wxid(+)
+         ]]> 
+	</select>
+	
+	<!-- select w.id,
+	       w.gzhmc,
+	       w.appid,
+	       w.appno,
+	       w.appsecret,
+	       x.id xtszid,
+	       x.accesstoken accesstoken,
+	       x.hddz
+	  from t_wx_jbxx w, t_wx_xtsz x
+	 where w.id = x.wxid
+	   and w.zt = '0'
+	   and x.zt = '0' -->
+	
+	<!-- 根据appid获取公众号信息，包含系统设置的 -->
+	<select id="getWithXtszByAppid">
+		<![CDATA[
+			select *
+				  from (select w.id, w.gzhmc, w.appid, w.appno, w.appsecret
+				          from t_wx_jbxx w
+				         where zt = '0') a,
+				       (select *
+				          from (select x.id xtszid, x.wxid wxid, x.accesstoken, x.lasttimemillis, x.hddz
+				                  from t_wx_xtsz x
+				                 where x.zt = '0')) b
+				 where a.id = b.wxid(+)
+				 and a.appid = :appid
+         ]]> 
+	</select>
+	<!-- select w.id,
+	       w.gzhmc,
+	       w.appid,
+	       w.appno,
+	       w.appsecret,
+	       x.id xtszid,
+	       x.accesstoken accesstoken,
+	       x.hddz
+	  from t_wx_jbxx w, t_wx_xtsz x
+	 where w.id = x.wxid
+	   and w.zt = :zt
+	   and x.zt = :zt
+	   and appid = :appid -->
+	
+	<!-- 根据微信id获取公众号信息，包含系统设置的 -->
+	<select id="getWithXtszByWeid">
+		<![CDATA[
+			select *
+				  from (select w.id, w.gzhmc, w.appid, w.appno, w.appsecret
+				          from t_wx_jbxx w
+				         where zt = '0') a,
+				       (select *
+				          from (select x.id xtszid,x.wxid wxid, x.accesstoken, x.lasttimemillis, x.hddz
+				                  from t_wx_xtsz x
+				                 where x.zt = '0')) b
+				 where a.id = b.wxid(+)
+				 and a.id = :id
+         ]]> 
+	</select>
+	
+	<!-- 根据appno获取公众号信息，包含系统设置的 -->
+	<select id="getWithXtszByAppno">
+		<![CDATA[
+			select *
+				  from (select w.id, w.gzhmc, w.appid, w.appno, w.appsecret
+				          from t_wx_jbxx w
+				         where zt = '0') a,
+				       (select *
+				          from (select x.id xtszid,x.wxid wxid, x.accesstoken, x.lasttimemillis, x.hddz
+				                  from t_wx_xtsz x
+				                 where x.zt = '0')) b
+				 where a.id = b.wxid(+)
+				 and a.appno = :appno
+         ]]> 
+	</select>
+	
+	<update id="deleteXtszByWxid">
+		<![CDATA[
+			update t_wx_xtsz x
+				set x.zt = '1'
+				where x.wxid = :wxid
+				and x.zt = :zt
+		]]> 
+	</update>
+	
+	
+	
+</wechatsys>

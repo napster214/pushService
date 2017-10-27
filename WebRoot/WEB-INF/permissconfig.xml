@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="GB2312"?>
+<jadlsoft-jaly>
+	<!-- 	url是链接方式，
+			paramname是功能参数名称
+			paramvalue是功能参数值
+			gncode是对应功能代码，
+			managetype是数据管理方式，0为无限制，1为属地管理，2为下级管理，
+			manageparam是管理参数，列表查询使用queryparamter[字段名称]，其中queryparamter可以省略 -->
+	
+	<!-- ================dlm =================== -->
+	<item url="/manage/index.do" gncode="" managetype="0" manageparam="" />
+	<item url="/index/top.jsp" gncode="" managetype="0" manageparam="" />
+	<item url="/index/left.jsp" gncode="" managetype="0" manageparam="" />
+	<item url="/index/main.jsp" gncode="" managetype="0" manageparam="" />
+	
+	<item url="/" gncode="" managetype="0" manageparam="" />
+	
+	<item url="/service/logoutService.do?method=localLogout" gncode="" managetype="0" manageparam="" />
+	<item url="/service/logoutService.do?method=remoteLogout" gncode="" managetype="0" manageparam="" />
+	
+	<item url="/admin/wechatlist.do" gncode="" managetype="0" manageparam="" />
+</jadlsoft-jaly>

@@ -1,0 +1,242 @@
+package com.jadlsoft.struts.action;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.util.EntityUtils;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.actions.DispatchAction;
+
+import com.jadlsoft.business.admin.wechat.IWeChatSysManager;
+import com.jadlsoft.cache.WeChatCache;
+import com.jadlsoft.handler.GzhHandler;
+import com.jadlsoft.utils.JsonUtil;
+import com.jadlsoft.utils.ResponseUtils;
+import com.jadlsoft.utils.StringUtils;
+import com.jadlsoft.utils.XMLUtils;
+import com.jadlsoft.utils.httpRequestProxy.HttpRequestProxy;
+import com.jadlsoft.utils.httpRequestProxy.HttpUtils;
+
+public class MainAction extends DispatchAction {
+	
+	private IWeChatSysManager weChatSysManager;
+	public void setWeChatSysManager(IWeChatSysManager weChatSysManager) {
+		this.weChatSysManager = weChatSysManager;
+	}
+
+	/**
+	 * 作为申请公众号时候的验证地址URL
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public synchronized ActionForward authentication(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		String echostr = request.getParameter("echostr");	//如果校验成功，将该值返回给微信后台
+		/*
+		 * 校验时候会走这个方法，但是用户每次访问也会走这个方法，现在判断依据就是echostr是否为空
+		 */
+		if (StringUtils.isBlank(echostr)) {
+			//是用户访问
+			return autoRespMsg(mapping, form, request, response);
+		}
+		
+		/**
+		 * token 统一使用 jadlsoft
+		 * 验证时候，微信后台会发送如下参数：
+		 * 	signature	微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。
+		 * 	timestamp	时间戳
+		 *	nonce	随机数
+		 *	echostr	随机字符串
+		 * 
+		 * 	校验是否为微信后台发送的依据（防止其他人调用该接口）
+		 * 		1）将token、timestamp、nonce三个参数进行字典序排序
+				2）将三个参数字符串拼接成一个字符串进行sha1加密
+				3）开发者获得加密后的字符串可与signature对比，标识该请求来源于微信
+		 */
+		String token = "jadlsoft";
+		String timestamp = request.getParameter("timestamp");  
+		String nonce = request.getParameter("nonce");  
+		
+		String signature = request.getParameter("signature");  
+		
+		//校验
+		if (StringUtils.isBlank(echostr) || StringUtils.isBlank(timestamp) 
+				|| StringUtils.isBlank(nonce) || StringUtils.isBlank(signature)) {
+			//校验失败
+			return null;
+		}
+		
+		//1、将token、timestamp、nonce三个参数进行字典序排序
+		List<String> list = new ArrayList<String>();
+		list.add(token);
+		list.add(timestamp);
+		list.add(nonce);
+		Collections.sort(list);
+		//2、sha1加密
+		@SuppressWarnings("deprecation")
+		String sign = DigestUtils.shaHex(list.get(0)+list.get(1)+list.get(2));
+		//3、比较
+		if (signature.equals(sign)) {
+			//校验成功
+			ResponseUtils.render(response, echostr);
+			return null;
+		}else {
+			//校验失败
+			return null;
+		}
+	}
+	
+	/**
+	 * 自动回复消息
+	 * 	根据微信后台传递的公众号的appid，去缓存中获取，如果有对应的处理自动回复的URL，就异步调用并处理，没有就返回默认值
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return: ActionForward
+	 */
+	public ActionForward autoRespMsg(ActionMapping mapping, ActionForm form,
+			   HttpServletRequest request, HttpServletResponse response)
+			   throws Exception {
+		
+		//避免重复
+		long currentTimeMillis = System.currentTimeMillis();
+		long lastTimeMillis = WeChatCache.lastDealMillis;
+		if (currentTimeMillis - lastTimeMillis <= 1500) {
+			ResponseUtils.render(response, "success");
+			return null;
+		}else {
+			WeChatCache.lastDealMillis = System.currentTimeMillis();
+		}
+		
+		String result = "";
+		//1、接收微信后台传递的xml消息
+		String xml = getStrFromReqIO(request);
+		if (StringUtils.isBlank(xml)) {
+			return null;
+		}
+		//2、解析获取公众号的appid和用户的openid
+		Map map = XMLUtils.transXmlStringToMap(xml);
+		
+    	String openid = (String) map.get("FromUserName");
+    	String appno = (String) map.get("ToUserName");
+    	String msg = (String) map.get("Content");
+    	//3、去库中查询是由有自定义的处理回复消息的链接
+    	Map gzhMap = weChatSysManager.getWithXtszByAppno(appno);
+    	if (StringUtils.isNullOrEmpty(gzhMap)) {
+    		log.error("未在库中查询到该公众号信息!");
+		}
+    	String respUrl = StringUtils.isNullOrEmpty(gzhMap.get("hddz")) ? "" : (String) gzhMap.get("hddz");
+    	if (StringUtils.isBlank(respUrl)) {
+    		return null;
+		}else {
+			
+			//调用其他事件也会触发这个方法，MsgType为event
+			if ("event".equals(map.get("MsgType"))) {
+				HttpRequestProxy proxy = new HttpRequestProxy();
+				try {
+					result = proxy.doRequest(respUrl, map, null, "UTF-8");
+				} catch (Exception e) {
+					log.error("【微信自动回复】远程客户端连接不上！远程地址为："+respUrl);
+					return null;
+				}
+			}else {
+				//4、获取返回内容
+		    	HttpRequestProxy proxt = new HttpRequestProxy();
+		    	Map data = new HashMap();
+		    	data.put("msg", msg);
+		    	try {
+		    		result = proxt.doRequest(respUrl, data, null, "UTF-8");
+				} catch (Exception e) {
+					log.error("【微信自动回复】远程客户端连接不上！远程地址为："+respUrl);
+					return null;
+				}
+			}
+		}
+    	
+    	if (StringUtils.isBlank(result)) {
+//	    	log.error("【微信自动回复】远程客户端未返回数据！远程地址为："+respUrl);
+			return null;
+		}
+    	
+    	//5、返回给用户
+    	Map resultMap = new HashMap();
+    	resultMap.put("ToUserName", XMLUtils.addZKH(openid));
+    	resultMap.put("FromUserName", XMLUtils.addZKH(appno));
+    	resultMap.put("CreateTime", map.get("CreateTime"));
+    	resultMap.put("MsgType", XMLUtils.addZKH("text"));
+    	resultMap.put("Content", XMLUtils.addZKH(result));
+    	
+    	String map2json = JsonUtil.map2json(resultMap);
+    	String respXml = XMLUtils.mapToXML(resultMap, false);
+        try {  
+        	ResponseUtils.render(response, respXml);
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        }  
+		return null;
+	}
+	
+	/*
+	 * 从request中接收IO传输信息
+	 */
+	private String getStrFromReqIO(HttpServletRequest request) {
+		StringBuffer sb = new StringBuffer();
+		InputStream is = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
+		try {
+			is = request.getInputStream();
+			isr = new InputStreamReader(is, "UTF-8");
+			br = new BufferedReader(isr);
+			String s = "";  
+	        while ((s = br.readLine()) != null) {  
+	            sb.append(s);  
+	        }
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null) {
+					br.close();
+				}
+				if (isr != null) {
+					isr.close();
+				}
+				if (is != null) {
+					is.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return sb.toString();
+	}
+	
+}

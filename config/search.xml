@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<items>
+	<!-- 生产单位 -->
+	<scc>
+		<table>(select dwdm,mc,ch from t_dm_scc_new )</table>
+		<resultcol>dwdm,mc,ch</resultcol>
+		<orderby>mc</orderby>
+		<title>单位代码,单位名称</title>
+		<searchcol>dwdm,mc</searchcol>
+		<searchcond>like,like</searchcond>
+		<searchtitle>单位代码,单位名称</searchtitle>
+		<pagesize>10</pagesize>
+		<colwidth>30%,50%,20%</colwidth>
+	</scc>
+</items>

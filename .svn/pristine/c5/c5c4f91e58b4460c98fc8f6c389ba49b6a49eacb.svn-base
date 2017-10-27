@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sms>
+	<!-- 保存待发送短信 -->
+	<update id="insertDx">
+		<![CDATA[
+			insert into t_sms_stay (id, content, mobile, state, intime) values(q_sms_stay.nextval,:content,:mobile,:state,sysdate)
+         ]]> 
+	</update>
+	
+	<!-- 获取待发送短信列表 -->
+	<select id="getDfsdxList">
+		<![CDATA[
+			select t.* from t_sms_stay t
+					 where	mobile is not null 
+					 	and  content is not null
+					 	and	 
+					 		(	
+					 			t.state = :state  
+					 			or
+					        	(
+					        		t.isgetres = :isgetres 
+					        		and 
+					        		t.sucstatus = :sucstatus 
+					        		and 
+					        		decode(t.resendcount, '', 0, t.resendcount) < :resendcount  
+					        		and 
+					        		ROUND(TO_NUMBER(sysdate - decode(t.resendtime, '', sysdate, t.resendtime)) * 24 * 60) >= decode(t.resendcount, '', 0, t.resendcount) * :resendtime
+					        	)
+					       	)
+					   
+					 for update skip locked
+         ]]> 
+	</select>
+	
+	<!-- 错误短信转移到错误信息表 -->
+	<update id="moveErrSms">
+		<![CDATA[
+			 insert into t_sms_err 
+				 (id, content, mobile, state, intime, sendtime, resendcount, resendtime, taskid, sms_status) 
+				 select Q_sms_err.nextval,content, mobile, state, intime, sendtime, resendcount, resendtime, taskid, sms_status 
+				 from t_sms_stay  where id=:id
+         ]]> 
+	</update>
+	
+	
+	
+	<!-- 未获取回执的短信列表 -->
+	<select id="getWhqSmsList">
+		<![CDATA[
+			select * from t_sms_stay where isgetres=:isgetres and state=:state  for update  skip locked
+         ]]> 
+	</select>
+</sms>

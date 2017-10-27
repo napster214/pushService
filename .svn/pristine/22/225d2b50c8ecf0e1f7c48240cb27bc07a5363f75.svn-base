@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	
+	<form-beans>
+		<form-bean name="listForm" type="org.apache.struts.action.DynaActionForm">
+			<form-property name="queryparamter" type="java.lang.String" initial="null" />
+			<form-property name="queryparamtername" type="java.lang.String" initial="null" />
+			<form-property name="pageNo" type="java.lang.String" />
+			<form-property name="pageTotal" type="java.lang.String" />
+			<form-property name="pageSize" type="java.lang.String" />
+			<form-property name="choice" type="java.lang.String" />
+		</form-bean>
+		
+	</form-beans>
+
+	<global-exceptions />
+
+	<action-mappings>
+		<action path="/index"  forward="/index/index.jsp" />
+		
+		<action attribute="listForm" name="listForm" path="/commonlist" scope="request" type="org.springframework.web.struts.DelegatingActionProxy">
+			<forward name="Savelist" path="/save/savelist.jsp" contextRelative="true" />
+			<forward name="x_count" path="/save/x_count.jsp" contextRelative="true" />
+		</action>
+
+		<action path="/queryXzqh" scope="request" type="com.jadlsoft.struts.action.dm.QueryAction">
+			<forward name="queryXzqh" path="/commons/queryXzqh.jsp" />
+		</action>
+		
+	</action-mappings>
+	
+	<message-resources parameter="com.jadlsoft.struts.ApplicationResources" />
+
+	<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
+		<set-property property="contextConfigLocation" value="/WEB-INF/config/applicationContext*.xml" />
+	</plug-in>
+	
+	<plug-in className="com.jadlsoft.utils.SpringBeanFactory" />
+	<plug-in className="com.jadlsoft.plugin.SetDatadicPlugin" />
+	<plug-in className="com.jadlsoft.plugin.DxfsPlugin" />
+	
+</struts-config>
+

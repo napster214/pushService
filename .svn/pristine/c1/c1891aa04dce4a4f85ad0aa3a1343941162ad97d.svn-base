@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+<struts-config>
+
+	
+	<form-beans>
+		<!-- 微信form -->
+		<form-bean name="weChatSysForm" type="com.jadlsoft.struts.form.WeChatSysForm"></form-bean>
+	</form-beans>
+
+	<action-mappings>
+		<!-- 微信后台管理 -->
+		<action path="/wechatsys" parameter="method"
+			scope="request"
+			name="weChatSysForm"
+			type="org.springframework.web.struts.DelegatingActionProxy">
+			
+			<forward name="editwechat" path="/wechatedit.jsp"></forward>
+			<forward name="wechatlist" path="/wechatlist.do" redirect="true"></forward>
+		</action>
+	</action-mappings>
+</struts-config>

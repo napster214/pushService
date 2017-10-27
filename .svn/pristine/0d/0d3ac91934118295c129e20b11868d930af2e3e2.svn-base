@@ -1,0 +1,10 @@
+$(function(){
+//parent.document.getElementById("loadingDiv").style.display="none"; 
+if("undefined"!=typeof(parent.unloading)){
+parent.unloading();
+parent.document.all("iframeContent").style.height=document.body.scrollHeight;
+}
+//parent.document.all("iframeContent").style.width=document.body.scrollWidth; 
+//parent.document.getElementById("main_ifrm").style.width=document.body.scrollWidth; 
+//parent.document.getElementById("main_ifrm").style.height=document.body.scrollHeight; 
+});

@@ -1,0 +1,74 @@
+body{
+font-family:'Open Sans',sans-serif;
+font-size:13px;
+background-color:#F5F5F5;
+}
+.navbarline{
+background-color:#355D81;
+background-image:linear-gradient(to bottom, #355D81, #315779);
+background-repeat:repeat-x;
+box-shadow:0 3px 8px rgba(0, 0, 0, 0.1);
+height:36px;
+}
+.main .appbrand > span{
+color:#FFFFFF;
+background:none repeat scroll 0 0 #20415C;
+border-right:1px solid #1E3449;
+height:35px;
+line-height:35px;
+padding:0 0 0 15px;
+width:189px;
+font-weight:700;
+display:block;
+cursor:pointer;
+}
+.img-sm-photo{
+border:1px solid #1e3449;
+width:15px;
+height:15px;
+margin-right:5px;
+}
+.appbrand > span{
+float:left;
+}
+.pull-right{
+float:right;
+display:inline;
+list-style:none;
+height:35px;
+line-height:35px;
+padding-right:30px;
+
+}
+.pull-right li > span{
+
+color:#A9CFEF;
+}
+.col-center{
+padding-top:50px;
+margin:auto;
+width:300px;
+}
+.login{
+
+}
+.login .form-signin{
+padding:5px;
+background-color:#FFFFFF;
+border:1px solid #E5E5E5;
+border-radius:5px;
+}
+.sign-in{
+	margin:10px 0px;
+	width:80px;
+	height:40px;
+	border-radius:5px;
+}
+.form-input{
+	margin-bottom:5px;
+	width:90%;
+}
+div#retTip li{
+list-style: none;	
+}
+input.error { border: 1px solid red; } 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+<struts-config>
+	<form-beans>
+	</form-beans>
+
+	<action-mappings>
+		<action path="/loginService" parameter="method"  scope="request" type="org.springframework.web.struts.DelegatingActionProxy">
+			<forward name="loginsucc" path="/admin/wechatlist.do" redirect="true"></forward>
+			<forward name="loginerr" path="loginerr.jsp"></forward>
+		</action>
+	</action-mappings>
+</struts-config>

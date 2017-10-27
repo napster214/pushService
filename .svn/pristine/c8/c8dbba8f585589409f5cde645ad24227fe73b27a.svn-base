@@ -1,0 +1,165 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib uri="/WEB-INF/taglib/page.tld" prefix="page"%>
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=GBK">
+	<title>服务后台管理系统 - 北京创新京安丹灵科技股份公司</title>
+	<!-- Bootstrap -->
+	<link href="${pageContext.request.contextPath }/common/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+	<link href="${pageContext.request.contextPath }/common/css/bootstrap/bootstrap-responsive.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath }/common/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath }/common/css/base.css">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath }/common/css/loginui.css">
+
+	<script src="${pageContext.request.contextPath }/common/js/jquery-1.7.1.min.js"></script>
+	 <script src="${pageContext.request.contextPath }/common/js/bootstrap/bootstrap.min.js"></script>
+	 <script src="${pageContext.request.contextPath }/common/js/jquery.easyui.min.js"></script>
+	</head>
+<body class="easyui-layout">
+<div id="bframe">
+<div data-options="region:'north',border:false" class="header">
+ 
+<div class="navbarline  navbar-static-top" role="navigation">
+	 <div class="navbar main">
+			<a href="${pageContext.request.contextPath }/manage/index.do" class="appbrand"><span>服务管理后台</span></a>
+			<!-- <a href="javasciprt:void(0);" class="layout-button-left">
+			<button type="button" class="navbar-toggle">
+			<span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+			</button>
+			</a> -->
+			<ul class="pull-right">
+			<li>
+			<span>欢迎  ${userSessionBean.userName }<img class="img-sm-photo" src="${pageContext.request.contextPath }/common/image/smalluser.png"/></span>
+			 <a href="javascript:void(0);" onclick="logOut()">
+			 <span>注销</span>
+			 </a> 
+			</li>
+			</ul>
+		</div>
+ 
+ </div>
+</div>
+<div style="clear:both"></div>
+<div id="westdiv" data-options="region:'west',title:'west',split:true,collapsed:false" style="width:189px;overflow-x:hidden;padding:0px;" >
+	<div class="menu">
+	<div class="pimg-left">
+<!-- 		<img class="img-thumbnail" style="width:51px;height:51px;" src="${pageContext.request.contextPath }/common/image/photo2.png" /> -->
+		<span> ${userSessionBean.userName }</span>
+	</div>
+	 <ul class="menu-left">
+	 <li>
+	 	<h2>
+	 		<a href="javascript:void(0);" onclick="showLink('')">微信服务</a>
+	 	</h2>
+	 	<ul>
+			<li><a href="javascript:void(0);" onclick="showLink('/wechat/wechatlist.do')">公众号列表</a></li>
+			<li><a href="javascript:void(0);" onclick="showLink('/wechat/wechatsys.do?method=accessGzh')">接入公众号</a></li>
+		 </ul>
+	 </li>
+	 <c:if test="${not empty gnlbList }">
+		<c:forEach items="${ gnlbList }" var="menu">
+		 <c:if test="${fn:endsWith(menu.dm,'000')}">
+		<li>
+		 	<h2>
+		 	<a href="javascript:void(0);" onclick="showLink('${menu.link }')">${menu.mc }</a>
+		 	</h2>
+		 <ul>
+		 	<c:forEach items="${ gnlbList }" var="submenu">
+			 <c:if test="${!fn:endsWith(submenu.dm,'000') and ( fn:substring(submenu.dm,0,3) eq fn:substring(menu.dm,0,3) )}">
+				<li><a href="javascript:void(0);" onclick="showLink('${submenu.link }')">${submenu.mc }</a></li>
+			</c:if>
+			</c:forEach>
+		 </ul>
+		 </li>
+		 </c:if>
+		</c:forEach>
+	  </c:if>
+	 </ul>
+	 </div>
+</div>
+<div style="clear:both"></div>
+  <div data-options="region:'center'" style="height:100%;">
+  <div id="main_ifrm" class="main_ifrm">
+<%--   <div id="loadingDiv" style="display:block;margin-top:70px;height:15px;text-align:center">
+		<img style="width:100px;height:15px;" align="absmiddle" src="${pageContext.request.contextPath }/images/loading.gif" />
+	</div> --%>
+   <iframe id="iframeContent" name="iframeContent" style="width:100%;height:550px;border:none;" 
+   		frameborder="no" scrolling="no" src="${pageContext.request.contextPath }/wechat/wechatlist.do"></iframe>
+   <div class="foot-addr text-center">
+	CopyRight 北京创新京安丹灵科技股份公司
+</div>
+  </div>	
+</div>
+
+
+</div>
+ <script type="text/javascript"> 
+$(function(){
+	$(".menu-left").addClass("menu-left");
+	  $(".menu-left li h2").toggle(function(){
+					$(this).addClass("menu-sel");
+                    $(this).next("ul").slideDown(200);
+                },function(){
+					$(this).removeClass("menu-sel");
+                    $(this).next("ul").slideUp(200);
+                });
+});
+
+function showLink(url){
+	if(''!=url){
+	onloading();
+	var rurl="${pageContext.request.contextPath }"+url;
+	$("#iframeContent").attr("src",rurl);
+	}
+}
+
+function logOut(){
+	if(confirm("确定要退出吗？")){
+		var url="${pageContext.request.contextPath }/dologin/loginService.do?method=logout";
+		$.ajax({
+			type:"post",
+			url:url,
+			dataType:"html",
+			success:function(ret){
+				if("succ"==ret){
+					window.location.href="${pageContext.request.contextPath }/commons/promptlogin.html";
+				}else{
+					alert(ret);
+				}
+			},
+			error:function(ret){
+				alert("注销出错");
+			}
+		});
+	}
+	
+}
+
+
+function onloading(){
+$.messager.progress({title:"",msg:"",text:"正在查询中,请稍等......",interval:"300"});
+}
+function unloading(){
+$.messager.progress('close');
+}
+
+/**
+function submainFrm() {
+		$.getJSON("http://sso.jadlsoft.com.cn:8080/singlesignonsys//service/logoutService.do?method=remoteLogout&callback=?", function(ret) {
+    		if("success"==ret){
+					window.location.replace("http://192.168.20.29:8080/mbscjyjkxt/index.do");
+				} 
+		});
+	}
+*/
+
+onloading();
+ </script>
+ </body>
+</html>		

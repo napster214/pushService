@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<login>
+	<!-- 获取所有公众号信息，包含系统设置信息 -->
+	<select id="get">
+		<![CDATA[
+			select * from t_xt_user u 
+				where u.userid = :userid
+				and u.password = :password
+				and u.zt = :zt
+         ]]> 
+	</select>
+	
+</login>

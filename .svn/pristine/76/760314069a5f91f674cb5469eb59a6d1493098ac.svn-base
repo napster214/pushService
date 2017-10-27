@@ -1,0 +1,8 @@
+
+sms.url.sendmsg=http://dx.ipyy.net/smsJson.aspx
+sms.url.getstatus=http://dx.ipyy.net/statusJsonApi.aspx
+
+sms.post.userid=jadl
+sms.post.account=AB00280
+sms.post.password=AB0028020
+
